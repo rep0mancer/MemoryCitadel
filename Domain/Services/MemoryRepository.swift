@@ -19,6 +19,7 @@ public protocol MemoryRepository {
     func deleteRoom(_ room: MemoryRoom) async throws
 }
 
+
 /// Concrete implementation of `MemoryRepository` backed by Core Data. It
 /// ensures operations are performed on the correct context and
 /// converts underlying errors to `CitadelError`.
@@ -149,6 +150,22 @@ public final class CoreDataMemoryRepository: MemoryRepository {
             try persistenceController.saveContext()
         } catch {
             throw error
+        }
+    }
+}
+
+extension CoreDataMemoryRepository {
+    /// Links decoded rooms to their parent wings based on the
+    /// `decodedWingID` property.
+    /// - Parameters:
+    ///   - rooms: The rooms that were decoded from JSON.
+    ///   - wings: The available wings to attach to.
+    func attach(decoded rooms: [MemoryRoom], to wings: [Wing]) {
+        let mapping = Dictionary(uniqueKeysWithValues: wings.map { ($0.id, $0) })
+        for room in rooms {
+            if let id = room.decodedWingID, let wing = mapping[id] {
+                room.wing = wing
+            }
         }
     }
 }
