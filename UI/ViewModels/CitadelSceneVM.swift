@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import SceneKit
+import CoreData
 
 /// View model responsible for constructing the 3D citadel scene. It
 /// observes the repository for changes and rebuilds the scene when
@@ -17,6 +18,9 @@ public final class CitadelSceneVM: ObservableObject {
     private let repository: MemoryRepository
     private let proceduralFactory: ProceduralFactory
 
+    /// Holds Combine subscriptions for context change notifications.
+    private var cancellables: Set<AnyCancellable> = []
+
     /// References to the persistent camera and light nodes in the scene.
     private var cameraNode: SCNNode?
     private var lightNode: SCNNode?
@@ -27,6 +31,24 @@ public final class CitadelSceneVM: ObservableObject {
         self.proceduralFactory = proceduralFactory
         // Initialise scene with default camera and lighting
         setupScene()
+        // Observe context changes to update the scene automatically
+        NotificationCenter.default.publisher(
+            for: .NSManagedObjectContextObjectsDidChange,
+            object: PersistenceController.shared.container.viewContext
+        )
+        .sink { [weak self] notification in
+            guard let self else { return }
+            guard let info = notification.userInfo else { return }
+            let keys = [NSInsertedObjectsKey, NSUpdatedObjectsKey, NSDeletedObjectsKey]
+            for key in keys {
+                if let objs = info[key] as? Set<NSManagedObject>,
+                   objs.contains(where: { $0 is Wing || $0 is MemoryRoom }) {
+                    Task { await self.reload() }
+                    break
+                }
+            }
+        }
+        .store(in: &cancellables)
         Task {
             await reload()
         }
