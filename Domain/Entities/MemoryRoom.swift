@@ -29,6 +29,10 @@ public class MemoryRoom: NSManagedObject, Identifiable, Codable {
     /// Back reference to the owning wing.
     @NSManaged public var wing: Wing
 
+    /// Temporarily stores the decoded parent wing identifier so the
+    /// relationship can be resolved after decoding.
+    public var decodedWingID: UUID?
+
     /// When true the room is considered archived and will be hidden
     /// from the UI. A background purge will permanently delete it.
     @NSManaged public var isArchived: Bool
@@ -79,8 +83,9 @@ public class MemoryRoom: NSManagedObject, Identifiable, Codable {
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         isArchived = try container.decode(Bool.self, forKey: .isArchived)
         // The wing relationship is resolved after decoding. Decode the
-        // identifier optionally so missing keys don't cause a failure.
-        _ = try container.decodeIfPresent(UUID.self, forKey: .wingID)
+        // identifier optionally so missing keys don't cause a failure and
+        // store it temporarily for later resolution.
+        decodedWingID = try container.decodeIfPresent(UUID.self, forKey: .wingID)
     }
 
     public func encode(to encoder: Encoder) throws {

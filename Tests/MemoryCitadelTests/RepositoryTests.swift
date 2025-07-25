@@ -56,4 +56,38 @@ final class RepositoryTests: XCTestCase {
         let fetchedWing = fetched.wings?.first
         XCTAssertEqual(fetchedWing?.rooms?.count, 1)
     }
+
+    func testDecodedRoomsAttachToWing() async throws {
+        purchaseManager.entitlement = .premium
+        let palace = try await repository.createPalace(name: "Import Palace")
+        let wingA = try await repository.createWing(in: palace, title: "A")
+        let wingB = try await repository.createWing(in: palace, title: "B")
+
+        let iso = ISO8601DateFormatter()
+        let date = iso.string(from: Date())
+        let json = """
+        [
+            {
+                "id": "\(UUID().uuidString)",
+                "title": "Imported",
+                "detail": null,
+                "date": null,
+                "attachments": null,
+                "createdAt": "\(date)",
+                "updatedAt": "\(date)",
+                "isArchived": false,
+                "wingID": "\(wingA.id.uuidString)"
+            }
+        ]
+        """.data(using: .utf8)!
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        decoder.userInfo[.context] = persistenceController.container.viewContext
+        let rooms = try decoder.decode([MemoryRoom].self, from: json)
+        repository.attach(decoded: rooms, to: [wingA, wingB])
+
+        XCTAssertEqual(rooms.first?.wing, wingA)
+        XCTAssertEqual(wingA.rooms?.contains(rooms.first!), true)
+    }
 }
