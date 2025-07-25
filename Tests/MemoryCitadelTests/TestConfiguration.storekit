@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>identifier</key>
+  <string>TestConfiguration</string>
+  <key>storeKitConfigurationVersion</key>
+  <string>1.0</string>
+  <key>data</key>
+  <dict>
+    <key>products</key>
+    <array>
+      <dict>
+        <key>referenceName</key>
+        <string>Premium</string>
+        <key>productIdentifier</key>
+        <string>citadel.premium</string>
+        <key>displayName</key>
+        <string>Premium</string>
+        <key>familyShareable</key>
+        <false/>
+        <key>productType</key>
+        <string>non-consumable</string>
+        <key>price</key>
+        <real>0.00</real>
+        <key>localizations</key>
+        <dict>
+          <key>en_US</key>
+          <dict>
+            <key>name</key>
+            <string>Premium</string>
+            <key>description</key>
+            <string>Premium unlock</string>
+          </dict>
+        </dict>
+      </dict>
+    </array>
+  </dict>
+  <key>environment</key>
+  <string>Xcode</string>
+</dict>
+</plist>
