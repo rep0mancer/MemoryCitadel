@@ -5,6 +5,7 @@ import SwiftUI
 /// disappears from the list; a future purge task will remove it
 /// permanently.
 struct MemoryListView: View {
+    private let wing: Wing
     @ObservedObject private var viewModel: MemoryListVM
     @State private var showAddSheet = false
     @State private var title: String = ""
@@ -13,6 +14,7 @@ struct MemoryListView: View {
     @State private var includeDate: Bool = false
 
     init(wing: Wing) {
+        self.wing = wing
         _viewModel = ObservedObject(wrappedValue: MemoryListVM(wing: wing))
     }
 
@@ -48,7 +50,7 @@ struct MemoryListView: View {
                 }
             }
         }
-        .navigationTitle(Text(viewModel.rooms.first?.wing.title ?? "Rooms"))
+        .navigationTitle(Text(wing.title))
         .searchable(text: $viewModel.searchText)
         .onChange(of: viewModel.searchText) { _ in
             Task { await viewModel.refresh() }
