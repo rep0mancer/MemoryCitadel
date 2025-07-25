@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyDataType</key>
+            <string>UserGeneratedContent</string>
+            <key>NSPrivacyPurpose</key>
+            <string>Syncing memories across devices via CloudKit</string>
+        </dict>
+    </array>
+    <key>NSPrivacyCrashReporting</key>
+    <false/>
+</dict>
+</plist>

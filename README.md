@@ -81,7 +81,7 @@ English (`en`) and German (`de`) localisations are provided. Use
 
 ## Privacy
 
-Memory Citadel does not include any third‑party analytics. A Privacy
-Manifest file is included in the project and describes how data is
+Memory Citadel does not include any third‑party analytics. A
+`Resources/PrivacyInfo.xcprivacy` manifest file describes how data is
 used. The app synchronises user data via iCloud/CloudKit in a secure
-manner. No personal data is shared with third parties.
+manner and no personal data is shared with third parties.
