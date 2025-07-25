@@ -12,6 +12,7 @@ struct MemoryListView: View {
     @State private var detail: String = ""
     @State private var date: Date = Date()
     @State private var includeDate: Bool = false
+    @State private var newRoomTitle: String = ""
 
     init(wing: Wing) {
         self.wing = wing
@@ -47,6 +48,23 @@ struct MemoryListView: View {
                         Label("Archive", systemImage: "archivebox")
                     }
                     .tint(.orange)
+                }
+            }
+
+            Section(header: Text("New Room")) {
+                HStack {
+                    TextField("Enter new room title", text: $newRoomTitle)
+                    Button(action: {
+                        let trimmedTitle = newRoomTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmedTitle.isEmpty else { return }
+                        Task {
+                            await viewModel.addRoom(title: trimmedTitle, detail: nil, date: nil)
+                            newRoomTitle = ""
+                        }
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                    }
+                    .disabled(newRoomTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
         }
