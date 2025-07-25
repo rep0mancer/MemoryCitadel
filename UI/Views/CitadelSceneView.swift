@@ -14,6 +14,7 @@ struct CitadelSceneView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
+        scnView.accessibilityIdentifier = "citadelSceneView"
         scnView.backgroundColor = UIColor.systemBackground
         scnView.allowsCameraControl = false
         scnView.antialiasingMode = .multisampling4X
