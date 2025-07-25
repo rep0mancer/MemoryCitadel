@@ -9,10 +9,16 @@ rendering.
 
 ## Build and Run
 
-1. Open `MemoryCitadel.xcodeproj` in Xcode 15.2 or later.
-2. Ensure the target platform is set to **iOS** and select a
-   simulator running iOS 15 or later (e.g. *iPhone 15*).
-3. Build and run the **MemoryCitadel** scheme.
+This repository does not include the `MemoryCitadel.xcodeproj` file. To
+compile and run the app you can create a project yourself:
+
+1. Launch **Xcode 15.2** (or later) and create a new *iOS App* project
+   named **MemoryCitadel**.
+2. Remove any boilerplate code and add the files from `Domain`, `UI`,
+   `Data`, `Extensions`, `Resources` and `MemoryCitadelApp.swift` to the
+   target.
+3. Select a simulator running iOS 15 or later (e.g. *iPhone 15*) and
+   build the **MemoryCitadel** scheme.
 
 ### Dependencies
 
