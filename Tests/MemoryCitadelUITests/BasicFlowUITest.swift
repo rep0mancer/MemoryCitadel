@@ -65,8 +65,10 @@ final class BasicFlowUITest: XCTestCase {
         // Navigate to citadel tab and verify a node appears
         let citadelTab = app.tabBars.buttons.element(boundBy: 1)
         citadelTab.tap()
-        // Wait a moment for scene to load
-        sleep(2)
+        // Wait for the SceneKit view to load
+        let scnView = app.otherElements["citadelSceneView"]
+        let sceneLoaded = expectation(for: NSPredicate(format: "exists == true"), evaluatedWith: scnView, handler: nil)
+        wait(for: [sceneLoaded], timeout: 5)
         // Delete room from MemoryListView (go back) to test removal
         palacesTab.tap()
         firstCell.tap()
