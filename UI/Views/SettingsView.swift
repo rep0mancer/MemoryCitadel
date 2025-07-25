@@ -7,6 +7,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
     @State private var isPurchasing: Bool = false
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
 
     var body: some View {
         Form {
@@ -43,8 +44,9 @@ struct SettingsView: View {
             }
 
             Section(header: Text("Appearance")) {
-                Text("Theme selection is not yet implemented.")
-                    .foregroundColor(.secondary)
+                Toggle(isOn: $isDarkMode) {
+                    Text("Dark Mode")
+                }
             }
         }
     }

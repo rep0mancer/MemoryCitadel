@@ -17,9 +17,9 @@ struct MemoryCitadelApp: App {
     /// and handling StoreKit subscription events.
     @StateObject private var purchaseManager = PurchaseManager()
 
-    /// The global app theme. In a real application this might be
-    /// persisted in user defaults and toggled by the settings view.
-    @State private var isDarkMode: Bool = false
+    /// The global app theme. This is persisted using `AppStorage` so the
+    /// user's choice is stored across launches.
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
 
     var body: some Scene {
         WindowGroup {
