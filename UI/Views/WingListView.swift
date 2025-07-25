@@ -1,0 +1,84 @@
+import SwiftUI
+
+/// Displays the wings within a specific palace. Users can add new
+/// wings and navigate to the list of rooms in each wing.
+struct WingListView: View {
+    @ObservedObject private var viewModel: WingListVM
+    @State private var showAddSheet = false
+    @State private var newWingTitle: String = ""
+
+    init(palace: MemoryPalace) {
+        _viewModel = ObservedObject(wrappedValue: WingListVM(palace: palace))
+    }
+
+    var body: some View {
+        List {
+            ForEach(viewModel.wings) { wing in
+                NavigationLink(destination: MemoryListView(wing: wing)) {
+                    Text(wing.title)
+                }
+            }
+            .onDelete { indexSet in
+                Task {
+                    for index in indexSet {
+                        let wing = viewModel.wings[index]
+                        await viewModel.deleteWing(wing)
+                    }
+                }
+            }
+        }
+        .onAppear {
+            Task { await viewModel.refresh() }
+        }
+        .alert(item: $viewModel.alertError) { error in
+            Alert(title: Text(error.errorDescription ?? "Error"))
+        }
+        .navigationBarTitle(Text(viewModel.wings.first?.palace.name ?? "Wings"), displayMode: .inline)
+        .navigationBarItems(trailing: Button(action: {
+            showAddSheet = true
+        }) {
+            Image(systemName: "plus")
+        })
+        .sheet(isPresented: $showAddSheet) {
+            NavigationView {
+                Form {
+                    Section(header: Text("New Wing")) {
+                        TextField("Title", text: $newWingTitle)
+                    }
+                }
+                .navigationTitle(Text("Add Wing"))
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showAddSheet = false
+                            newWingTitle = ""
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Add") {
+                            let trimmed = newWingTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !trimmed.isEmpty else { return }
+                            Task {
+                                await viewModel.addWing(title: trimmed)
+                                newWingTitle = ""
+                                showAddSheet = false
+                            }
+                        }
+                        .disabled(newWingTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct WingListView_Previews: PreviewProvider {
+    static var previews: some View {
+        let context = PersistenceController.preview.container.viewContext
+        let palace = MemoryPalace(context: context)
+        palace.name = "Sample Palace"
+        return NavigationView {
+            WingListView(palace: palace)
+        }
+    }
+}

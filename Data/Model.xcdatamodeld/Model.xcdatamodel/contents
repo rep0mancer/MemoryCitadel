@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="Model" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19504" minimumToolsVersion="13.0" targetRuntime="iOS" systemVersion="21G83">
+    <entity name="MemoryPalace" representedClassName="MemoryPalace" syncable="YES">
+        <attribute name="id" attributeType="UUIDAttributeType" optional="NO"/>
+        <attribute name="name" attributeType="String" optional="NO"/>
+        <attribute name="createdAt" attributeType="Date" optional="NO"/>
+        <attribute name="updatedAt" attributeType="Date" optional="NO"/>
+        <relationship name="wings" toMany="YES" optional="YES" deleteRule="Cascade" destinationEntity="Wing" inverseName="palace" inverseEntity="Wing"/>
+    </entity>
+    <entity name="Wing" representedClassName="Wing" syncable="YES">
+        <attribute name="id" attributeType="UUIDAttributeType" optional="NO"/>
+        <attribute name="title" attributeType="String" optional="NO"/>
+        <attribute name="createdAt" attributeType="Date" optional="NO"/>
+        <attribute name="updatedAt" attributeType="Date" optional="NO"/>
+        <relationship name="palace" toMany="NO" optional="NO" deleteRule="Nullify" destinationEntity="MemoryPalace" inverseName="wings" inverseEntity="MemoryPalace"/>
+        <relationship name="rooms" toMany="YES" optional="YES" deleteRule="Cascade" destinationEntity="MemoryRoom" inverseName="wing" inverseEntity="MemoryRoom"/>
+    </entity>
+    <entity name="MemoryRoom" representedClassName="MemoryRoom" syncable="YES">
+        <attribute name="id" attributeType="UUIDAttributeType" optional="NO"/>
+        <attribute name="title" attributeType="String" optional="NO"/>
+        <attribute name="detail" attributeType="String" optional="YES"/>
+        <attribute name="date" attributeType="Date" optional="YES"/>
+        <attribute name="attachments" attributeType="Binary" optional="YES"/>
+        <attribute name="createdAt" attributeType="Date" optional="NO"/>
+        <attribute name="updatedAt" attributeType="Date" optional="NO"/>
+        <attribute name="isArchived" attributeType="Boolean" optional="NO" defaultValueString="NO" usesScalarValueType="YES"/>
+        <relationship name="wing" toMany="NO" optional="NO" deleteRule="Nullify" destinationEntity="Wing" inverseName="rooms" inverseEntity="Wing"/>
+    </entity>
+</model>
