@@ -3,11 +3,13 @@ import SwiftUI
 /// Displays the wings within a specific palace. Users can add new
 /// wings and navigate to the list of rooms in each wing.
 struct WingListView: View {
+    private let palace: MemoryPalace
     @ObservedObject private var viewModel: WingListVM
     @State private var showAddSheet = false
     @State private var newWingTitle: String = ""
 
     init(palace: MemoryPalace) {
+        self.palace = palace
         _viewModel = ObservedObject(wrappedValue: WingListVM(palace: palace))
     }
 
@@ -33,7 +35,7 @@ struct WingListView: View {
         .alert(item: $viewModel.alertError) { error in
             Alert(title: Text(error.errorDescription ?? "Error"))
         }
-        .navigationBarTitle(Text(viewModel.wings.first?.palace.name ?? "Wings"), displayMode: .inline)
+        .navigationBarTitle(Text(palace.name), displayMode: .inline)
         .navigationBarItems(trailing: Button(action: {
             showAddSheet = true
         }) {
