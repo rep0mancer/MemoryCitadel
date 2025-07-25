@@ -15,7 +15,8 @@ final class CitadelSceneVMTests: XCTestCase {
         purchaseManager = PurchaseManager()
         repository = CoreDataMemoryRepository(persistenceController: persistenceController,
                                               purchaseManager: purchaseManager)
-        viewModel = CitadelSceneVM(repository: repository)
+        viewModel = CitadelSceneVM(repository: repository,
+                                   context: persistenceController.container.viewContext)
     }
 
     override func tearDown() {

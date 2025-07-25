@@ -9,6 +9,7 @@ struct RootView: View {
     /// The purchase manager used to determine access to premium
     /// features such as additional palaces.
     @EnvironmentObject private var purchaseManager: PurchaseManager
+    @Environment(\.managedObjectContext) private var context
 
     var body: some View {
         TabView {
@@ -22,7 +23,7 @@ struct RootView: View {
             }
 
             NavigationView {
-                CitadelSceneView()
+                CitadelSceneView(viewModel: CitadelSceneVM(context: context))
                     .navigationTitle(Text("Citadel"))
             }
             .tabItem {

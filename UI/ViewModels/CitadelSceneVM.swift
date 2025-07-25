@@ -17,6 +17,7 @@ public final class CitadelSceneVM: ObservableObject {
 
     private let repository: MemoryRepository
     private let proceduralFactory: ProceduralFactory
+    private let context: NSManagedObjectContext
 
     /// Holds Combine subscriptions for context change notifications.
     private var cancellables: Set<AnyCancellable> = []
@@ -26,15 +27,17 @@ public final class CitadelSceneVM: ObservableObject {
     private var lightNode: SCNNode?
 
     public init(repository: MemoryRepository = CoreDataMemoryRepository(),
-                proceduralFactory: ProceduralFactory = ProceduralFactory()) {
+                proceduralFactory: ProceduralFactory = ProceduralFactory(),
+                context: NSManagedObjectContext = PersistenceController.shared.container.viewContext) {
         self.repository = repository
         self.proceduralFactory = proceduralFactory
+        self.context = context
         // Initialise scene with default camera and lighting
         setupScene()
         // Observe context changes to update the scene automatically
         NotificationCenter.default.publisher(
             for: .NSManagedObjectContextObjectsDidChange,
-            object: PersistenceController.shared.container.viewContext
+            object: context
         )
         .sink { [weak self] notification in
             guard let self else { return }
