@@ -78,8 +78,9 @@ public class MemoryRoom: NSManagedObject, Identifiable, Codable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         isArchived = try container.decode(Bool.self, forKey: .isArchived)
-        // Relationship resolution occurs externally; we temporarily
-        // decode the wing identifier for later use if needed.
+        // The wing relationship is resolved after decoding. Decode the
+        // identifier optionally so missing keys don't cause a failure.
+        _ = try container.decodeIfPresent(UUID.self, forKey: .wingID)
     }
 
     public func encode(to encoder: Encoder) throws {
