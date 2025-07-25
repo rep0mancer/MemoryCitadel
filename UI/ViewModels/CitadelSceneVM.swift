@@ -22,6 +22,9 @@ public final class CitadelSceneVM: ObservableObject {
     /// Holds Combine subscriptions for context change notifications.
     private var cancellables: Set<AnyCancellable> = []
 
+    /// Reference to the currently running reload task.
+    private var reloadTask: Task<Void, Never>?
+
     /// References to the persistent camera and light nodes in the scene.
     private var cameraNode: SCNNode?
     private var lightNode: SCNNode?
@@ -46,7 +49,12 @@ public final class CitadelSceneVM: ObservableObject {
             for key in keys {
                 if let objs = info[key] as? Set<NSManagedObject>,
                    objs.contains(where: { $0 is Wing || $0 is MemoryRoom }) {
-                    Task { await self.reload() }
+                    // Cancel any existing reload task to avoid overlapping work
+                    self.reloadTask?.cancel()
+                    // Assign and start a new task
+                    self.reloadTask = Task {
+                        await self.reload()
+                    }
                     break
                 }
             }
