@@ -1,6 +1,7 @@
 import Foundation
 import SceneKit
 import GameplayKit
+import CryptoKit
 
 /// Generates deterministic geometry for a memory room. By seeding the
 /// random number generator with a value derived from the room's UUID the
@@ -15,8 +16,12 @@ public struct ProceduralFactory {
     /// - Parameter room: the memory room to base the geometry on
     /// - Returns: a root `SCNNode` representing the building
     public func makeBuildingNode(for room: MemoryRoom) -> SCNNode {
-        // Seed RNG with a deterministic value derived from the room UUID
-        let seed = withUnsafeBytes(of: room.id.uuid) { ptr in
+        // Seed RNG with a deterministic value derived from a stable hash of
+        // the entire UUID. Using SHA256 avoids collisions from only hashing
+        // the leading bytes of the identifier.
+        let uuidData = withUnsafeBytes(of: room.id.uuid) { Data($0) }
+        let digest = SHA256.hash(data: uuidData)
+        let seed = digest.withUnsafeBytes { ptr in
             ptr.load(as: UInt64.self).bigEndian
         }
         let randomSource = GKLinearCongruentialRandomSource(seed: seed)
