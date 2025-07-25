@@ -18,6 +18,10 @@ public final class CitadelSceneVM: ObservableObject {
     private let proceduralFactory: ProceduralFactory
     private let purchaseManager: PurchaseManager
 
+    /// References to the persistent camera and light nodes in the scene.
+    private var cameraNode: SCNNode?
+    private var lightNode: SCNNode?
+
     public init(repository: MemoryRepository = CoreDataMemoryRepository(),
                 proceduralFactory: ProceduralFactory = ProceduralFactory(),
                 purchaseManager: PurchaseManager = PurchaseManager()) {
@@ -37,28 +41,30 @@ public final class CitadelSceneVM: ObservableObject {
     private func setupScene() {
         scene = SCNScene()
         // Camera
-        let cameraNode = SCNNode()
-        cameraNode.camera = SCNCamera()
-        cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 40
+        let camNode = SCNNode()
+        camNode.camera = SCNCamera()
+        camNode.camera?.usesOrthographicProjection = true
+        camNode.camera?.orthographicScale = 40
         // Place camera at an isometric angle (45° rotation around Y,
         // 35.264° tilt around X)
-        cameraNode.eulerAngles = SCNVector3(-Float(35.264 * .pi / 180.0), Float(45 * .pi / 180.0), 0)
-        cameraNode.position = SCNVector3(x: 30, y: 30, z: 30)
-        scene.rootNode.addChildNode(cameraNode)
+        camNode.eulerAngles = SCNVector3(-Float(35.264 * .pi / 180.0), Float(45 * .pi / 180.0), 0)
+        camNode.position = SCNVector3(x: 30, y: 30, z: 30)
+        scene.rootNode.addChildNode(camNode)
+        cameraNode = camNode
         // Lighting
-        let lightNode = SCNNode()
-        lightNode.light = SCNLight()
-        lightNode.light?.type = .ambient
-        lightNode.light?.intensity = 1000
-        scene.rootNode.addChildNode(lightNode)
+        let light = SCNNode()
+        light.light = SCNLight()
+        light.light?.type = .ambient
+        light.light?.intensity = 1000
+        scene.rootNode.addChildNode(light)
+        lightNode = light
     }
 
     /// Reloads the scene by removing existing building nodes and
     /// generating new ones for each non‑archived room in every wing.
     public func reload() async {
-        // Remove all existing child nodes except camera and light
-        for child in scene.rootNode.childNodes where child !== scene.rootNode.childNodes.first && child !== scene.rootNode.childNodes.last {
+        // Remove all existing child nodes except the persistent camera and light
+        for child in scene.rootNode.childNodes where child !== cameraNode && child !== lightNode {
             child.removeFromParentNode()
         }
         do {
