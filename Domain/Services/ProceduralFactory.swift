@@ -3,7 +3,7 @@ import SceneKit
 import GameplayKit
 
 /// Generates deterministic geometry for a memory room. By seeding the
-/// random number generator with the room's UUID hash value the
+/// random number generator with a value derived from the room's UUID the
 /// resulting node will always have the same dimensions, shapes and
 /// colours for a given room. Buildings are assembled from simple
 /// primitives and composited into a parent node.
@@ -15,8 +15,10 @@ public struct ProceduralFactory {
     /// - Parameter room: the memory room to base the geometry on
     /// - Returns: a root `SCNNode` representing the building
     public func makeBuildingNode(for room: MemoryRoom) -> SCNNode {
-        // Seed RNG with room id hash for determinism
-        let seed = UInt64(bitPattern: Int64(room.id.uuidString.hashValue))
+        // Seed RNG with a deterministic value derived from the room UUID
+        let seed = withUnsafeBytes(of: room.id.uuid) { ptr in
+            ptr.load(as: UInt64.self).bigEndian
+        }
         let randomSource = GKLinearCongruentialRandomSource(seed: seed)
         let random = GKRandomDistribution(randomSource: randomSource)
 
