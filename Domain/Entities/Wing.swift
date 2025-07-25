@@ -27,6 +27,10 @@ public class Wing: NSManagedObject, Identifiable, Codable {
     /// cascade ensures rooms are removed when the wing is deleted.
     @NSManaged public var rooms: Set<MemoryRoom>?
 
+    /// Temporarily stores the decoded parent palace identifier so
+    /// the relationship can be resolved after decoding.
+    public var decodedPalaceID: UUID?
+
     // MARK: - Lifecycle
 
     public override func awakeFromInsert() {
@@ -62,8 +66,10 @@ public class Wing: NSManagedObject, Identifiable, Codable {
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
         rooms = try container.decodeIfPresent(Set<MemoryRoom>.self, forKey: .rooms)
-        // The palace relationship is resolved outside of decoding. We
-        // store the id temporarily for later resolution if necessary.
+        // The palace relationship is resolved outside of decoding. Decode the
+        // identifier optionally so decoding doesn't fail if the key is missing
+        // and store it temporarily for later resolution.
+        decodedPalaceID = try container.decodeIfPresent(UUID.self, forKey: .palaceID)
     }
 
     public func encode(to encoder: Encoder) throws {
