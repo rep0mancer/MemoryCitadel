@@ -168,4 +168,18 @@ extension CoreDataMemoryRepository {
             }
         }
     }
+
+    /// Links decoded wings to their parent palaces based on the
+    /// `decodedPalaceID` property.
+    /// - Parameters:
+    ///   - wings: The wings that were decoded from JSON.
+    ///   - palaces: The available palaces to attach to.
+    func attach(decoded wings: [Wing], to palaces: [MemoryPalace]) {
+        let mapping = Dictionary(uniqueKeysWithValues: palaces.map { ($0.id, $0) })
+        for wing in wings {
+            if let id = wing.decodedPalaceID, let palace = mapping[id] {
+                wing.palace = palace
+            }
+        }
+    }
 }
