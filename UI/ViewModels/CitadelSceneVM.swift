@@ -16,18 +16,15 @@ public final class CitadelSceneVM: ObservableObject {
 
     private let repository: MemoryRepository
     private let proceduralFactory: ProceduralFactory
-    private let purchaseManager: PurchaseManager
 
     /// References to the persistent camera and light nodes in the scene.
     private var cameraNode: SCNNode?
     private var lightNode: SCNNode?
 
     public init(repository: MemoryRepository = CoreDataMemoryRepository(),
-                proceduralFactory: ProceduralFactory = ProceduralFactory(),
-                purchaseManager: PurchaseManager = PurchaseManager()) {
+                proceduralFactory: ProceduralFactory = ProceduralFactory()) {
         self.repository = repository
         self.proceduralFactory = proceduralFactory
-        self.purchaseManager = purchaseManager
         // Initialise scene with default camera and lighting
         setupScene()
         Task {
