@@ -59,6 +59,14 @@ A coverage badge is generated via Codecov after the CI workflow runs:
 
 ![Coverage](https://img.shields.io/badge/coverage-80%25-green)
 
+## Relationship Resolution
+
+Parent relationships between palaces, wings and rooms are established
+after decoding. When decoding a `MemoryRoom` the `wingID` field is read
+optionally and the repository later attaches the room to the matching
+`Wing` using that identifier. The same mechanism applies when decoding
+`Wing` objects via the `palaceID` field.
+
 ## Localization
 
 All user‑facing strings are defined in `Resources/Localizable.strings`.
