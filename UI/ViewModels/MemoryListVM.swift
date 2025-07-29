@@ -32,9 +32,9 @@ public final class MemoryListVM: ObservableObject {
         }
     }
 
-    public func addRoom(title: String, detail: String?, date: Date?) async {
+    public func addRoom(title: String, detail: String?, date: Date?, attachments: Data?) async {
         do {
-            _ = try await repository.createRoom(in: wing, title: title, detail: detail, date: date, attachments: nil)
+            _ = try await repository.createRoom(in: wing, title: title, detail: detail, date: date, attachments: attachments)
             await refresh()
         } catch let error as CitadelError {
             alertError = error

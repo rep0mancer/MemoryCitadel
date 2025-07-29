@@ -23,7 +23,10 @@ struct RootView: View {
             }
 
             NavigationView {
-                CitadelSceneView(viewModel: CitadelSceneVM(context: context))
+                CitadelSceneView(viewModel: CitadelSceneVM(context: context)) { roomID in
+                    print("Tapped on room with ID: \(roomID)")
+                    // Navigation logic will be added here in the future
+                }
                     .navigationTitle(Text("Citadel"))
             }
             .tabItem {
