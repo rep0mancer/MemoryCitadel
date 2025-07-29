@@ -15,8 +15,8 @@ final class ProceduralFactoryTests: XCTestCase {
         room.createdAt = Date()
         room.updatedAt = Date()
         let factory = ProceduralFactory()
-        let nodeA = factory.makeBuildingNode(for: room)
-        let nodeB = factory.makeBuildingNode(for: room)
+        let nodeA = factory.makeBuildingNode(for: room, wingIndex: 0)
+        let nodeB = factory.makeBuildingNode(for: room, wingIndex: 0)
         XCTAssertEqual(nodeA.childNodes.count, nodeB.childNodes.count)
         for (child1, child2) in zip(nodeA.childNodes, nodeB.childNodes) {
             // Compare geometry types and sizes

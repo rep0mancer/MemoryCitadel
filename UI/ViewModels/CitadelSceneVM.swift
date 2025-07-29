@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import SceneKit
 import CoreData
+import GameplayKit
 
 /// View model responsible for constructing the 3D citadel scene. It
 /// observes the repository for changes and rebuilds the scene when
@@ -100,18 +101,19 @@ public final class CitadelSceneVM: ObservableObject {
         do {
             let palaces = try await repository.fetchPalaces()
             var wingIndex = 0
+            let noise = GKNoise(GKPerlinNoiseSource())
             for palace in palaces {
                 guard let wings = palace.wings else { continue }
                 for wing in wings.sorted(by: { $0.createdAt < $1.createdAt }) {
                     var roomIndex = 0
                     if let rooms = wing.rooms?.filter({ !$0.isArchived }) {
                         for room in rooms.sorted(by: { $0.createdAt < $1.createdAt }) {
-                            let node = proceduralFactory.makeBuildingNode(for: room)
+                            let node = proceduralFactory.makeBuildingNode(for: room, wingIndex: wingIndex)
                             // Position on grid: x = wingIndex*50 + (roomIndex mod 10) * 6
-                            // z coordinate remains 0 for simplicity
                             let x = Double(wingIndex) * 50.0 + Double(roomIndex % 10) * 6.0
                             let z = Double(roomIndex / 10) * 10.0
-                            node.position = SCNVector3(x, 0, z)
+                            let y = Double(noise.value(atPosition: vector_double3(x * 0.02, 0, z * 0.02))) * 2.0
+                            node.position = SCNVector3(x, y, z)
                             scene.rootNode.addChildNode(node)
                             roomIndex += 1
                         }

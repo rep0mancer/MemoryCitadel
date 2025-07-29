@@ -11,21 +11,37 @@ struct RootView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
     @Environment(\.managedObjectContext) private var context
 
+    @State private var selectedTab: Int = 0
+    @State private var navigationPath = NavigationPath()
+
     var body: some View {
-        TabView {
-            NavigationView {
+        TabView(selection: $selectedTab) {
+            NavigationStack(path: $navigationPath) {
                 PalaceListView()
                     .navigationTitle(Text("Palaces"))
+                    .navigationDestination(for: MemoryRoom.self) { room in
+                        MemoryRoomDetailView(room: room)
+                    }
+                    .navigationDestination(for: Wing.self) { wing in
+                        MemoryListView(wing: wing)
+                    }
             }
             .tabItem {
                 Image(systemName: "building.2.crop.circle")
                 Text("Palaces")
             }
+            .tag(0)
 
             NavigationView {
                 CitadelSceneView(viewModel: CitadelSceneVM(context: context)) { roomID in
-                    print("Tapped on room with ID: \(roomID)")
-                    // Navigation logic will be added here in the future
+                    Task {
+                        let repository = CoreDataMemoryRepository()
+                        if let room = try? await repository.fetchRoom(id: roomID) {
+                            navigationPath.append(room.wing)
+                            navigationPath.append(room)
+                            selectedTab = 0
+                        }
+                    }
                 }
                     .navigationTitle(Text("Citadel"))
             }
@@ -33,6 +49,7 @@ struct RootView: View {
                 Image(systemName: "cube")
                 Text("Citadel")
             }
+            .tag(1)
 
             NavigationView {
                 SettingsView()
@@ -42,6 +59,7 @@ struct RootView: View {
                 Image(systemName: "gearshape")
                 Text("Settings")
             }
+            .tag(2)
         }
     }
 }
