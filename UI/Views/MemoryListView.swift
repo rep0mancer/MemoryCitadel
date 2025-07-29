@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Lists the memory rooms within a given wing. Rooms can be
 /// searched, added, archived and deleted. When a room is archived it
@@ -145,6 +146,7 @@ struct MemoryListView: View {
                             let attachmentsData = try? JSONEncoder().encode(attachments)
                             Task {
                                 await viewModel.addRoom(title: trimmedTitle, detail: detail.isEmpty ? nil : detail, date: optionalDate, attachments: attachmentsData)
+                                HapticManager.notification(.success)
                                 clearInputs()
                                 showAddSheet = false
                             }

@@ -15,6 +15,7 @@ public protocol MemoryRepository {
     func deleteWing(_ wing: Wing) async throws
 
     func createRoom(in wing: Wing, title: String, detail: String?, date: Date?, attachments: Data?) async throws -> MemoryRoom
+    func updateRoom(_ room: MemoryRoom, title: String, detail: String?) async throws
     func archiveRoom(_ room: MemoryRoom) async throws
     func deleteRoom(_ room: MemoryRoom) async throws
     func purgeArchivedRooms() async throws
@@ -126,6 +127,17 @@ public final class CoreDataMemoryRepository: MemoryRepository {
         do {
             try persistenceController.saveContext()
             return room
+        } catch {
+            throw error
+        }
+    }
+
+    public func updateRoom(_ room: MemoryRoom, title: String, detail: String?) async throws {
+        room.title = title
+        room.detail = detail
+        room.updatedAt = Date()
+        do {
+            try persistenceController.saveContext()
         } catch {
             throw error
         }

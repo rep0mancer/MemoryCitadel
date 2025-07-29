@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Displays a list of memory palaces. Users can create, select or
 /// delete palaces. When the free tier limit is reached tapping the
@@ -65,6 +66,7 @@ struct PalaceListView: View {
                         Button("Add") {
                             let trimmed = newPalaceName.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !trimmed.isEmpty else { return }
+                            HapticManager.impact(.medium)
                             Task {
                                 await viewModel.addPalace(name: trimmed)
                                 newPalaceName = ""
