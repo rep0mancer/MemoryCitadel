@@ -27,4 +27,12 @@ public extension SCNNode {
         let action = SCNAction.fadeIn(duration: duration)
         runAction(action)
     }
+
+    /// Traverses up the scene graph to find the root node of a building.
+    func findBuildingRoot() -> SCNNode? {
+        if let name = name, name.hasPrefix("Building_") {
+            return self
+        }
+        return parent?.findBuildingRoot()
+    }
 }

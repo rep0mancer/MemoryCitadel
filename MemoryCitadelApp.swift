@@ -28,6 +28,9 @@ struct MemoryCitadelApp: App {
     /// and handling StoreKit subscription events.
     @StateObject private var purchaseManager = PurchaseManager()
 
+    /// Repository used for housekeeping tasks such as purging rooms.
+    private let repository = CoreDataMemoryRepository()
+
     /// The global app theme. This is persisted using `AppStorage` so the
     /// user's choice is stored across launches.
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
@@ -38,6 +41,11 @@ struct MemoryCitadelApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(purchaseManager)
                 .preferredColorScheme(isDarkMode ? .dark : .light)
+                .task {
+                    // Wait 5 seconds after launch to run the purge
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    try? await repository.purgeArchivedRooms()
+                }
         }
     }
 }

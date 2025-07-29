@@ -1,6 +1,19 @@
 import CoreData
 import Foundation
 
+/// Represents a single attachment linked to a memory room.
+public struct RoomAttachment: Codable, Identifiable, Hashable {
+    public let id: UUID
+    public let fileURLData: Data // Storing bookmark data for the URL
+    public var fileName: String
+
+    public init(fileURL: URL) throws {
+        self.id = UUID()
+        self.fileName = fileURL.lastPathComponent
+        self.fileURLData = try fileURL.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
+    }
+}
+
 /// Represents a single memory cue within a wing. Each room can
 /// optionally be scheduled by date and hold arbitrary attachments
 /// encoded as a JSON array of file URLs. Rooms can be archived

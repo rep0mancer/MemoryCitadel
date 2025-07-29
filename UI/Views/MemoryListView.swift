@@ -13,6 +13,8 @@ struct MemoryListView: View {
     @State private var date: Date = Date()
     @State private var includeDate: Bool = false
     @State private var newRoomTitle: String = ""
+    @State private var attachments: [RoomAttachment] = []
+    @State private var showDocumentPicker = false
 
     init(wing: Wing) {
         self.wing = wing
@@ -58,7 +60,7 @@ struct MemoryListView: View {
                         let trimmedTitle = newRoomTitle.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !trimmedTitle.isEmpty else { return }
                         Task {
-                            await viewModel.addRoom(title: trimmedTitle, detail: nil, date: nil)
+                            await viewModel.addRoom(title: trimmedTitle, detail: nil, date: nil, attachments: nil)
                             newRoomTitle = ""
                         }
                     }) {
@@ -100,6 +102,16 @@ struct MemoryListView: View {
                     Section(header: Text("Detail")) {
                         TextField("Detail", text: $detail)
                     }
+                    Section(header: Text("Attachments")) {
+                        ForEach(attachments, id: \.id) { attachment in
+                            Text(attachment.fileName)
+                        }
+                        .onDelete(perform: deleteAttachment)
+
+                        Button("Add Attachment...") {
+                            showDocumentPicker = true
+                        }
+                    }
                     Section {
                         Toggle(isOn: $includeDate) {
                             Text("Schedule Date")
@@ -124,8 +136,9 @@ struct MemoryListView: View {
                             let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !trimmedTitle.isEmpty else { return }
                             let optionalDate = includeDate ? date : nil
+                            let attachmentsData = try? JSONEncoder().encode(attachments)
                             Task {
-                                await viewModel.addRoom(title: trimmedTitle, detail: detail.isEmpty ? nil : detail, date: optionalDate)
+                                await viewModel.addRoom(title: trimmedTitle, detail: detail.isEmpty ? nil : detail, date: optionalDate, attachments: attachmentsData)
                                 clearInputs()
                                 showAddSheet = false
                             }
@@ -135,12 +148,27 @@ struct MemoryListView: View {
                 }
             }
         }
+        .sheet(isPresented: $showDocumentPicker) {
+            DocumentPicker { url in
+                do {
+                    let attachment = try RoomAttachment(fileURL: url)
+                    attachments.append(attachment)
+                } catch {
+                    print("Failed to create bookmark for URL: \(error)")
+                }
+            }
+        }
     }
 
     private func clearInputs() {
         title = ""
         detail = ""
         includeDate = false
+        attachments.removeAll()
+    }
+
+    private func deleteAttachment(at offsets: IndexSet) {
+        attachments.remove(atOffsets: offsets)
     }
 }
 
