@@ -1,5 +1,6 @@
 import SwiftUI
 import SceneKit
+import UIKit
 
 /// Wraps an `SCNView` for use within SwiftUI. Displays a 3D scene
 /// managed by `CitadelSceneVM` and bridges pinch and pan gestures to
@@ -103,6 +104,7 @@ struct CitadelSceneView: UIViewRepresentable {
 
             let uuidString = String(name.dropFirst(prefix.count))
             if let uuid = UUID(uuidString: uuidString) {
+                HapticManager.impact(.light)
                 // Call the closure with the found UUID
                 onRoomTapped?(uuid)
             }

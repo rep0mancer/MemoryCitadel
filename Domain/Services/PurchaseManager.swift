@@ -98,9 +98,13 @@ public final class PurchaseManager: ObservableObject {
     }
 
     /// Restores prior transactions and refreshes entitlement.
-    public func restorePurchases() async {
-        try? await AppStore.sync()
-        await updateEntitlement()
+    public func restorePurchases() async throws {
+        do {
+            try await AppStore.sync()
+            await updateEntitlement()
+        } catch {
+            throw CitadelError.purchase(error)
+        }
     }
 
     /// Observes the continuous transaction updates stream. When a

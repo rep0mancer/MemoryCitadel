@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Displays the wings within a specific palace. Users can add new
 /// wings and navigate to the list of rooms in each wing.
@@ -64,6 +65,7 @@ struct WingListView: View {
                         Button("Add") {
                             let trimmed = newWingTitle.trimmingCharacters(in: .whitespacesAndNewlines)
                             guard !trimmed.isEmpty else { return }
+                            HapticManager.impact(.medium)
                             Task {
                                 await viewModel.addWing(title: trimmed)
                                 newWingTitle = ""

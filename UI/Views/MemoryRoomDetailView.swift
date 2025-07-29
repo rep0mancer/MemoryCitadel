@@ -3,9 +3,21 @@ import QuickLook
 
 /// Displays details for a single memory room including its attachments.
 struct MemoryRoomDetailView: View {
-    let room: MemoryRoom
+    @ObservedObject var room: MemoryRoom
+    private let repository: MemoryRepository
+    @State private var editingTitle: String
+    @State private var editingDetail: String
+    @State private var isEditing = false
     @State private var previewURL: URL?
     @State private var showPreview = false
+    @State private var alertError: CitadelError?
+
+    init(room: MemoryRoom, repository: MemoryRepository = CoreDataMemoryRepository()) {
+        self.room = room
+        self.repository = repository
+        _editingTitle = State(initialValue: room.title)
+        _editingDetail = State(initialValue: room.detail ?? "")
+    }
 
     private var attachments: [RoomAttachment] {
         guard let data = room.attachments else { return [] }
@@ -15,8 +27,15 @@ struct MemoryRoomDetailView: View {
     var body: some View {
         List {
             Section(header: Text("Details")) {
-                if let detail = room.detail, !detail.isEmpty {
-                    Text(detail)
+                if isEditing {
+                    TextField("Title", text: $editingTitle)
+                    TextEditor(text: $editingDetail)
+                        .frame(minHeight: 100)
+                } else {
+                    Text(room.title)
+                    if let detail = room.detail, !detail.isEmpty {
+                        Text(detail)
+                    }
                 }
                 if let date = room.date {
                     Text(date, style: .date)
@@ -38,10 +57,30 @@ struct MemoryRoomDetailView: View {
             }
         }
         .navigationTitle(Text(room.title))
+        .toolbar {
+            Button(isEditing ? "Save" : "Edit") {
+                if isEditing {
+                    let trimmed = editingTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+                    Task {
+                        do {
+                            try await repository.updateRoom(room, title: trimmed, detail: editingDetail.isEmpty ? nil : editingDetail)
+                        } catch let error as CitadelError {
+                            alertError = error
+                        } catch {
+                            alertError = .unknown
+                        }
+                    }
+                }
+                isEditing.toggle()
+            }
+        }
         .sheet(isPresented: $showPreview) {
             if let url = previewURL {
                 QuickLookPreview(url: url)
             }
+        }
+        .alert(item: $alertError) { error in
+            Alert(title: Text(error.errorDescription ?? "Error"))
         }
     }
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Simple paywall explaining premium benefits and offering a purchase button.
 struct PaywallView: View {
@@ -15,6 +16,7 @@ struct PaywallView: View {
                 Text("Create unlimited palaces and access future features. Your memories stay synced via iCloud.")
                     .multilineTextAlignment(.center)
                 Button(action: {
+                    HapticManager.impact(.medium)
                     Task {
                         isPurchasing = true
                         defer { isPurchasing = false }

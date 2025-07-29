@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Presents application settings including subscription status and
 /// theme selection. Users can upgrade to the premium tier via a
@@ -21,6 +22,7 @@ struct SettingsView: View {
                 }
                 if purchaseManager.entitlement == .free {
                     Button(action: {
+                        HapticManager.impact(.medium)
                         Task {
                             isPurchasing = true
                             defer { isPurchasing = false }
@@ -43,7 +45,13 @@ struct SettingsView: View {
                         }
                     }
                     Button("Restore Purchases") {
-                        Task { await purchaseManager.restorePurchases() }
+                        Task {
+                            do {
+                                try await purchaseManager.restorePurchases()
+                            } catch {
+                                self.alertError = .purchase(error)
+                            }
+                        }
                     }
                 }
             }
