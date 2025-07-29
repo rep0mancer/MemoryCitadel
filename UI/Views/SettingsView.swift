@@ -7,6 +7,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
     @State private var isPurchasing: Bool = false
+    @State private var alertError: CitadelError?
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
 
     var body: some View {
@@ -26,10 +27,11 @@ struct SettingsView: View {
                             do {
                                 try await purchaseManager.purchasePremium()
                             } catch let error as CitadelError {
-                                // The view itself does not present alerts; instead the root view may
-                                print("Purchase error: \(error)")
+                                // Assign the error to trigger the alert
+                                self.alertError = error
                             } catch {
-                                print("Unknown purchase error: \(error)")
+                                // Wrap the unknown error and assign it
+                                self.alertError = .purchase(error)
                             }
                         }
                     }) {
@@ -48,6 +50,13 @@ struct SettingsView: View {
                     Text("Dark Mode")
                 }
             }
+        }
+        .alert(item: $alertError) { error in
+            Alert(
+                title: Text("Purchase Failed"),
+                message: Text(error.errorDescription ?? "An unknown error occurred."),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 }

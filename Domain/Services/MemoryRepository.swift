@@ -17,6 +17,7 @@ public protocol MemoryRepository {
     func createRoom(in wing: Wing, title: String, detail: String?, date: Date?, attachments: Data?) async throws -> MemoryRoom
     func archiveRoom(_ room: MemoryRoom) async throws
     func deleteRoom(_ room: MemoryRoom) async throws
+    func purgeArchivedRooms() async throws
 }
 
 
@@ -150,6 +151,22 @@ public final class CoreDataMemoryRepository: MemoryRepository {
             try persistenceController.saveContext()
         } catch {
             throw error
+        }
+    }
+
+    /// Purges all rooms that have been marked as archived.
+    public func purgeArchivedRooms() async throws {
+        let context = persistenceController.container.viewContext
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = MemoryRoom.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "isArchived == YES")
+
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+
+        do {
+            try context.execute(deleteRequest)
+            try persistenceController.saveContext()
+        } catch {
+            throw CitadelError.coreData(error)
         }
     }
 }

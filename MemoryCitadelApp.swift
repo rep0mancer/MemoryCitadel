@@ -12,6 +12,7 @@ struct MemoryCitadelApp: App {
   /// `-ui-testing` launch argument is present an in-memory store with
   /// sample data is injected to keep UI tests deterministic.
   private let persistenceController: PersistenceController
+  private let repository = CoreDataMemoryRepository()
 
   /// Creates the application instance. The persistence controller is
   /// selected based on launch arguments so UI tests can run in
@@ -38,6 +39,11 @@ struct MemoryCitadelApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(purchaseManager)
                 .preferredColorScheme(isDarkMode ? .dark : .light)
+                .task {
+                    // Wait 5 seconds after launch to run the purge
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    try? await repository.purgeArchivedRooms()
+                }
         }
     }
 }

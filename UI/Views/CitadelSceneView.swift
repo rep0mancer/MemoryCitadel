@@ -7,9 +7,11 @@ import SceneKit
 /// changes in the view model's scene.
 struct CitadelSceneView: UIViewRepresentable {
     @ObservedObject private var viewModel: CitadelSceneVM
+    var onRoomTapped: ((UUID) -> Void)?
 
-    init(viewModel: CitadelSceneVM = CitadelSceneVM()) {
+    init(viewModel: CitadelSceneVM = CitadelSceneVM(), onRoomTapped: ((UUID) -> Void)? = nil) {
         self.viewModel = viewModel
+        self.onRoomTapped = onRoomTapped
     }
 
     func makeUIView(context: Context) -> SCNView {
@@ -23,8 +25,10 @@ struct CitadelSceneView: UIViewRepresentable {
         // Gesture recognisers
         let pinch = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePinch(_:)))
         let pan = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePan(_:)))
+        let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
         scnView.addGestureRecognizer(pinch)
         scnView.addGestureRecognizer(pan)
+        scnView.addGestureRecognizer(tap)
         return scnView
     }
 
@@ -35,18 +39,20 @@ struct CitadelSceneView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(viewModel: viewModel)
+        Coordinator(viewModel: viewModel, onRoomTapped: onRoomTapped)
     }
 
     /// Coordinator handles gesture recognition and communicates
     /// adjustments to the SceneKit camera.
     class Coordinator: NSObject {
         private let viewModel: CitadelSceneVM
+        private let onRoomTapped: ((UUID) -> Void)?
         private var lastScale: CGFloat = 1.0
         private var lastTranslation: CGPoint = .zero
 
-        init(viewModel: CitadelSceneVM) {
+        init(viewModel: CitadelSceneVM, onRoomTapped: ((UUID) -> Void)?) {
             self.viewModel = viewModel
+            self.onRoomTapped = onRoomTapped
         }
 
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -79,6 +85,26 @@ struct CitadelSceneView: UIViewRepresentable {
                 lastTranslation = translation
             default:
                 break
+            }
+        }
+
+        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+            guard let scnView = gesture.view as? SCNView else { return }
+            let location = gesture.location(in: scnView)
+            let hitResults = scnView.hitTest(location, options: [:])
+
+            // Find the first node that is part of a building
+            guard let buildingNode = hitResults.first?.node.findBuildingRoot() else { return }
+
+            // Extract UUID from the node name
+            let name = buildingNode.name ?? ""
+            let prefix = "Building_"
+            guard name.hasPrefix(prefix) else { return }
+
+            let uuidString = String(name.dropFirst(prefix.count))
+            if let uuid = UUID(uuidString: uuidString) {
+                // Call the closure with the found UUID
+                onRoomTapped?(uuid)
             }
         }
     }
