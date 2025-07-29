@@ -10,6 +10,7 @@ import SwiftUI
 public final class PalaceListVM: ObservableObject {
     @Published public private(set) var palaces: [MemoryPalace] = []
     @Published public var alertError: CitadelError?
+    @Published public var shouldShowPaywall: Bool = false
 
     private let repository: MemoryRepository
     private let purchaseManager: PurchaseManager
@@ -38,7 +39,11 @@ public final class PalaceListVM: ObservableObject {
             _ = try await repository.createPalace(name: name)
             await refresh()
         } catch let error as CitadelError {
-            alertError = error
+            if case .procedural = error {
+                shouldShowPaywall = true
+            } else {
+                alertError = error
+            }
         } catch {
             alertError = CitadelError.unknown
         }

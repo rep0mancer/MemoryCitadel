@@ -97,6 +97,12 @@ public final class PurchaseManager: ObservableObject {
         }
     }
 
+    /// Restores prior transactions and refreshes entitlement.
+    public func restorePurchases() async {
+        try? await AppStore.sync()
+        await updateEntitlement()
+    }
+
     /// Observes the continuous transaction updates stream. When a
     /// transaction for the premium subscription is revoked or expires
     /// the entitlement is set back to free. This function runs until

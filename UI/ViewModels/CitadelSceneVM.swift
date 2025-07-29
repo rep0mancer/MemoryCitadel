@@ -27,6 +27,9 @@ public final class CitadelSceneVM: ObservableObject {
     /// Reference to the currently running reload task.
     private var reloadTask: Task<Void, Never>?
 
+    /// Tracks which room identifiers are currently represented in the scene.
+    private var currentRoomIDs: Set<UUID> = []
+
     /// References to the persistent camera and light nodes in the scene.
     private var cameraNode: SCNNode?
     private var lightNode: SCNNode?
@@ -106,6 +109,7 @@ public final class CitadelSceneVM: ObservableObject {
         do {
             let palaces = try await repository.fetchPalaces()
             var wingIndex = 0
+            var newIDs: Set<UUID> = []
             for palace in palaces {
                 guard let wings = palace.wings else { continue }
                 for wing in wings.sorted(by: { $0.createdAt < $1.createdAt }) {
@@ -118,16 +122,30 @@ public final class CitadelSceneVM: ObservableObject {
                             let noiseValue = terrainNoise.value(atPosition: vector_double2(x * 0.03, z * 0.03))
                             let y = Double(noiseValue) * 2.0
                             node.position = SCNVector3(x, y, z)
+                            if !currentRoomIDs.contains(room.id) {
+                                node.fadeIn()
+                            }
                             scene.rootNode.addChildNode(node)
+                            newIDs.insert(room.id)
                             roomIndex += 1
                         }
                     }
                     wingIndex += 1
                 }
             }
+            currentRoomIDs = newIDs
         } catch {
             // Log but don't crash; the scene will simply be empty
             print("Failed to reload scene: \(error)")
         }
+    }
+
+    /// Plays an explosion animation for the node corresponding to the provided room.
+    public func animateDeletion(for room: MemoryRoom) async {
+        guard let node = scene.rootNode.childNode(withName: "Building_\(room.id)", recursively: true) else { return }
+        node.applyRadialImpulse()
+        try? await Task.sleep(nanoseconds: 600_000_000)
+        node.removeFromParentNode()
+        currentRoomIDs.remove(room.id)
     }
 }

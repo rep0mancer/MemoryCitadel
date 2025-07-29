@@ -7,6 +7,7 @@ import SwiftUI
 struct MemoryListView: View {
     private let wing: Wing
     @ObservedObject private var viewModel: MemoryListVM
+    @EnvironmentObject private var citadelScene: CitadelSceneVM
     @State private var showAddSheet = false
     @State private var title: String = ""
     @State private var detail: String = ""
@@ -23,6 +24,10 @@ struct MemoryListView: View {
 
     var body: some View {
         List {
+            if viewModel.rooms.isEmpty {
+                Text("You have no rooms. Tap the '+' to create one.")
+                    .foregroundColor(.secondary)
+            }
             ForEach(viewModel.rooms) { room in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(room.title)
@@ -79,6 +84,7 @@ struct MemoryListView: View {
             await viewModel.refresh()
         }
         .onAppear {
+            viewModel.sceneViewModel = citadelScene
             Task { await viewModel.refresh() }
         }
         .alert(item: $viewModel.alertError) { error in
@@ -182,6 +188,7 @@ struct MemoryListView_Previews: PreviewProvider {
         wing.palace = palace
         return NavigationView {
             MemoryListView(wing: wing)
+                .environmentObject(CitadelSceneVM())
         }
     }
 }

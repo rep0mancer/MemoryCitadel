@@ -42,6 +42,9 @@ struct SettingsView: View {
                             Text("Unlock Premium")
                         }
                     }
+                    Button("Restore Purchases") {
+                        Task { await purchaseManager.restorePurchases() }
+                    }
                 }
             }
 

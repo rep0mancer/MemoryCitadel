@@ -13,11 +13,14 @@ public final class MemoryListVM: ObservableObject {
 
     private let wing: Wing
     private let repository: MemoryRepository
+    weak var sceneViewModel: CitadelSceneVM?
 
     public init(wing: Wing,
-                repository: MemoryRepository = CoreDataMemoryRepository()) {
+                repository: MemoryRepository = CoreDataMemoryRepository(),
+                sceneViewModel: CitadelSceneVM? = nil) {
         self.wing = wing
         self.repository = repository
+        self.sceneViewModel = sceneViewModel
     }
 
     public func refresh() async {
@@ -56,6 +59,9 @@ public final class MemoryListVM: ObservableObject {
 
     public func deleteRoom(_ room: MemoryRoom) async {
         do {
+            if let sceneViewModel {
+                await sceneViewModel.animateDeletion(for: room)
+            }
             try await repository.deleteRoom(room)
             await refresh()
         } catch let error as CitadelError {

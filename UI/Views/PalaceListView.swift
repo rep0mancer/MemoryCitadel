@@ -11,6 +11,10 @@ struct PalaceListView: View {
 
     var body: some View {
         List {
+            if viewModel.palaces.isEmpty {
+                Text("You have no palaces. Tap the '+' to create one.")
+                    .foregroundColor(.secondary)
+            }
             ForEach(viewModel.palaces) { palace in
                 NavigationLink(destination: WingListView(palace: palace)) {
                     VStack(alignment: .leading) {
@@ -72,6 +76,9 @@ struct PalaceListView: View {
                 }
             }
         }
+        .sheet(isPresented: $viewModel.shouldShowPaywall) {
+            PaywallView(isPresented: $viewModel.shouldShowPaywall)
+        }
     }
 }
 
@@ -81,6 +88,7 @@ struct PalaceListView_Previews: PreviewProvider {
             PalaceListView()
                 .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
                 .environmentObject(PurchaseManager())
+                .environmentObject(CitadelSceneVM())
         }
     }
 }

@@ -15,6 +15,10 @@ struct WingListView: View {
 
     var body: some View {
         List {
+            if viewModel.wings.isEmpty {
+                Text("You have no wings. Tap the '+' to create one.")
+                    .foregroundColor(.secondary)
+            }
             ForEach(viewModel.wings) { wing in
                 NavigationLink(destination: MemoryListView(wing: wing)) {
                     Text(wing.title)
@@ -81,6 +85,7 @@ struct WingListView_Previews: PreviewProvider {
         palace.name = "Sample Palace"
         return NavigationView {
             WingListView(palace: palace)
+                .environmentObject(CitadelSceneVM())
         }
     }
 }
