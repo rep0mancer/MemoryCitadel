@@ -11,6 +11,9 @@ struct RootView: View {
     @EnvironmentObject private var purchaseManager: PurchaseManager
     @Environment(\.managedObjectContext) private var context
 
+    /// Shared scene view model so other views can trigger animations.
+    @StateObject private var citadelViewModel = CitadelSceneVM()
+
     @State private var selectedTab: Int = 0
     @State private var navigationPath = NavigationPath()
 
@@ -33,7 +36,7 @@ struct RootView: View {
             .tag(0)
             
             NavigationView {
-                CitadelSceneView(viewModel: CitadelSceneVM(context: context)) { roomID in
+                CitadelSceneView(viewModel: citadelViewModel) { roomID in
                     Task {
                         let repository = CoreDataMemoryRepository()
                         if let room = try? await repository.fetchRoom(by: roomID) {
@@ -43,7 +46,7 @@ struct RootView: View {
                         }
                     }
                 }
-                    .navigationTitle(Text("Citadel"))
+                .navigationTitle(Text("Citadel"))
             }
             .tabItem {
                 Image(systemName: "cube")
@@ -61,6 +64,7 @@ struct RootView: View {
             }
             .tag(2)
         }
+        .environmentObject(citadelViewModel)
     }
 }
 
@@ -69,5 +73,6 @@ struct RootView_Previews: PreviewProvider {
         RootView()
             .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
             .environmentObject(PurchaseManager())
+            .environmentObject(CitadelSceneVM())
     }
 }
