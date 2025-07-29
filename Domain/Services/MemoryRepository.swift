@@ -18,6 +18,7 @@ public protocol MemoryRepository {
     func archiveRoom(_ room: MemoryRoom) async throws
     func deleteRoom(_ room: MemoryRoom) async throws
     func purgeArchivedRooms() async throws
+    func fetchRoom(by id: UUID) async throws -> MemoryRoom?
 }
 
 
@@ -165,6 +166,18 @@ public final class CoreDataMemoryRepository: MemoryRepository {
         do {
             try context.execute(deleteRequest)
             try persistenceController.saveContext()
+        } catch {
+            throw CitadelError.coreData(error)
+        }
+    }
+
+    /// Fetches a single room by its identifier.
+    public func fetchRoom(by id: UUID) async throws -> MemoryRoom? {
+        let request: NSFetchRequest<MemoryRoom> = MemoryRoom.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+        do {
+            return try persistenceController.container.viewContext.fetch(request).first
         } catch {
             throw CitadelError.coreData(error)
         }

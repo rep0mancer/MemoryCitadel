@@ -2,6 +2,8 @@ import Combine
 import Foundation
 import SceneKit
 import CoreData
+import GameplayKit
+import simd
 
 /// View model responsible for constructing the 3D citadel scene. It
 /// observes the repository for changes and rebuilds the scene when
@@ -28,6 +30,10 @@ public final class CitadelSceneVM: ObservableObject {
     /// References to the persistent camera and light nodes in the scene.
     private var cameraNode: SCNNode?
     private var lightNode: SCNNode?
+    private let terrainNoise: GKNoise = {
+        let source = GKPerlinNoiseSource(frequency: 0.05, octaveCount: 3, persistence: 0.5, lacunarity: 2.0, seed: 1)
+        return GKNoise(source)
+    }()
 
     public init(repository: MemoryRepository = CoreDataMemoryRepository(),
                 proceduralFactory: ProceduralFactory = ProceduralFactory(),
@@ -106,12 +112,12 @@ public final class CitadelSceneVM: ObservableObject {
                     var roomIndex = 0
                     if let rooms = wing.rooms?.filter({ !$0.isArchived }) {
                         for room in rooms.sorted(by: { $0.createdAt < $1.createdAt }) {
-                            let node = proceduralFactory.makeBuildingNode(for: room)
-                            // Position on grid: x = wingIndex*50 + (roomIndex mod 10) * 6
-                            // z coordinate remains 0 for simplicity
+                            let node = proceduralFactory.makeBuildingNode(for: room, wingIndex: wingIndex)
                             let x = Double(wingIndex) * 50.0 + Double(roomIndex % 10) * 6.0
                             let z = Double(roomIndex / 10) * 10.0
-                            node.position = SCNVector3(x, 0, z)
+                            let noiseValue = terrainNoise.value(atPosition: vector_double2(x * 0.03, z * 0.03))
+                            let y = Double(noiseValue) * 2.0
+                            node.position = SCNVector3(x, y, z)
                             scene.rootNode.addChildNode(node)
                             roomIndex += 1
                         }
